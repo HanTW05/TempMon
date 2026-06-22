@@ -2,25 +2,43 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Temp Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TempMon Dashboard</title>
+
   <style>
     body {
       font-family: Arial;
-      background: #111;
+      background: #0f0f0f;
       color: white;
       text-align: center;
-    }
-
-    .card {
-      background: #222;
-      margin: 10px;
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 22px;
+      margin: 0;
+      padding: 10px;
     }
 
     h2 {
-      color: #00ffcc;
+      color: #00ffd5;
+      margin-bottom: 15px;
+    }
+
+    .card {
+      background: #1e1e1e;
+      margin: 10px auto;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,255,213,0.2);
+    }
+
+    .time {
+      color: #ffcc00;
+    }
+
+    .value {
+      font-size: 26px;
+      font-weight: bold;
+      color: #00ff99;
     }
   </style>
 </head>
@@ -29,29 +47,48 @@
 
 <h2>🔥 即時溫度監控</h2>
 
-<div class="card">乳飲溫度: <span id="a">-</span></div>
-<div class="card">乳品溫度: <span id="b">-</span></div>
-<div class="card">乳品110: <span id="c">-</span></div>
-<div class="card">一處回水: <span id="d">-</span></div>
-<div class="card">二處回水: <span id="e">-</span></div>
+<div class="card time">
+  更新時間<br>
+  <span id="time">-</span>
+</div>
 
+<div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
+<div class="card">乳品110<br><span class="value" id="c">-</span></div>
+<div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
+<div class="card">一處回水<br><span class="value" id="d">-</span></div>
+<div class="card">二處回水<br><span class="value" id="e">-</span></div>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-  // 🔥 改成你的 Firebase
+  // 🔥 Firebase config（你的）
   const firebaseConfig = {
     databaseURL: "https://temp-mon-dab85-default-rtdb.asia-southeast1.firebasedatabase.app"
   };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-
   const ref = db.ref("plant/latest");
 
+  // ⏱ timestamp 轉時間
+  function formatTime(ts) {
+    if (!ts) return "-";
+  
+    const year = ts.slice(0,4);
+    const month = ts.slice(4,6);
+    const day = ts.slice(6,8);
+    const hour = ts.slice(8,10);
+    const min = ts.slice(10,12);
+    const sec = ts.slice(12,14);
+  
+    return `${year}/${month}/${day} ${hour}:${min}:${sec}`;
+  }
+
+  // 🔄 即時監聽
   ref.on("value", (snapshot) => {
     const data = snapshot.val();
-
     if (!data) return;
 
     document.getElementById("a").innerText = data["乳飲溫度"];
@@ -59,6 +96,8 @@
     document.getElementById("c").innerText = data["乳品110"];
     document.getElementById("d").innerText = data["一處回水"];
     document.getElementById("e").innerText = data["二處回水"];
+
+    document.getElementById("time").innerText = formatTime(data["ts"]);
   });
 </script>
 
