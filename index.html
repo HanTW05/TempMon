@@ -13,52 +13,13 @@
       text-align: center;
       margin: 0;
       padding: 10px;
+      /* 避免滑動時整個網頁跟著左右晃動 */
+      overflow-x: hidden; 
     }
 
     h2 {
       color: #00ffd5;
       margin-bottom: 15px;
-    }
-
-    /* 標籤按鈕容器 */
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    /* 標籤按鈕樣式 */
-    .tab-btn {
-      background: #1e1e1e;
-      color: #00ffd5;
-      border: 1px solid #00ffd5;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    /* 標籤按鈕啟用或懸停時的樣式 */
-    .tab-btn.active, .tab-btn:hover {
-      background: #00ffd5;
-      color: #0f0f0f;
-    }
-
-    /* 內容區塊隱藏與顯示 */
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .card {
@@ -74,13 +35,67 @@
 
     .time {
       color: #ffcc00;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .value {
       font-size: 26px;
       font-weight: bold;
       color: #00ff99;
+    }
+
+    /* 左右滑動的容器 */
+    .swipe-container {
+      display: flex;
+      width: 100%;
+      overflow-x: auto;
+      /* CSS 滾動捕捉 (手機滑動的靈魂) */
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10px;
+    }
+
+    /* 隱藏底部的滾動條 */
+    .swipe-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* 單個滑動頁面 */
+    .swipe-page {
+      min-width: 100%;
+      scroll-snap-align: center;
+      box-sizing: border-box;
+    }
+
+    .page-title {
+      color: #00ffd5;
+      font-size: 18px;
+      margin: 5px 0 15px 0;
+      font-weight: bold;
+    }
+
+    /* 指示點點容器 */
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    /* 單個點點 */
+    .dot {
+      width: 10px;
+      height: 10px;
+      background-color: #444;
+      border-radius: 50%;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* 目前所在頁面的點點 */
+    .dot.active {
+      background-color: #00ffd5;
+      box-shadow: 0 0 8px rgba(0,255,213,0.8);
     }
   </style>
 </head>
@@ -89,31 +104,38 @@
 
 <h2>🔥 即時溫度監控</h2>
 
-<!-- 切換標籤按鈕 -->
-<div class="tabs">
-  <button id="btn-ice" class="tab-btn active" onclick="switchTab('ice')">儲冰槽</button>
-  <button id="btn-fridge" class="tab-btn" onclick="switchTab('fridge')">冷藏庫</button>
-</div>
-
 <div class="card time">
   更新時間<br>
   <span id="time">-</span>
 </div>
 
-<!-- 儲冰槽溫度區塊 (原本的) -->
-<div id="ice-tab" class="tab-content active">
-  <div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
-  <div class="card">乳品110<br><span class="value" id="c">-</span></div>
-  <div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
-  <div class="card">一處回水<br><span class="value" id="d">-</span></div>
-  <div class="card">二處回水<br><span class="value" id="e">-</span></div>
+<!-- 滑動指示點點 -->
+<div class="dots">
+  <div class="dot active" id="dot-1"></div>
+  <div class="dot" id="dot-2"></div>
 </div>
 
-<!-- 冷藏庫溫度區塊 (新增的) -->
-<div id="fridge-tab" class="tab-content">
-  <div class="card">冷藏一庫<br><span class="value" id="f1">-</span></div>
-  <div class="card">冷藏二庫<br><span class="value" id="f2">-</span></div>
-  <div class="card">冷藏三庫<br><span class="value" id="f3">-</span></div>
+<!-- 左右滑動區塊 -->
+<div class="swipe-container" id="swipe-container">
+  
+  <!-- 第 1 頁：儲冰槽 -->
+  <div class="swipe-page">
+    <div class="page-title">【 儲 】</div>
+    <div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
+    <div class="card">乳品110<br><span class="value" id="c">-</span></div>
+    <div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
+    <div class="card">一處回水<br><span class="value" id="d">-</span></div>
+    <div class="card">二處回水<br><span class="value" id="e">-</span></div>
+  </div>
+
+  <!-- 第 2 頁：冷藏庫 -->
+  <div class="swipe-page">
+    <div class="page-title">【 藏 】</div>
+    <div class="card">一廠<br><span class="value" id="f1">-</span></div>
+    <div class="card">二廠<br><span class="value" id="f2">-</span></div>
+    <div class="card">布丁<br><span class="value" id="f3">-</span></div>
+  </div>
+
 </div>
 
 <!-- Firebase -->
@@ -121,20 +143,26 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-  // 🔘 標籤切換邏輯
-  function switchTab(tabName) {
-    // 移除所有內容的 active class
-    document.getElementById('ice-tab').classList.remove('active');
-    document.getElementById('fridge-tab').classList.remove('active');
-    
-    // 移除所有按鈕的 active class
-    document.getElementById('btn-ice').classList.remove('active');
-    document.getElementById('btn-fridge').classList.remove('active');
-    
-    // 將點擊的目標加上 active class
-    document.getElementById(tabName + '-tab').classList.add('active');
-    document.getElementById('btn-' + tabName).classList.add('active');
-  }
+  // 🔘 監聽滑動事件，更新小點點的狀態
+  const container = document.getElementById('swipe-container');
+  const dot1 = document.getElementById('dot-1');
+  const dot2 = document.getElementById('dot-2');
+
+  container.addEventListener('scroll', () => {
+    // 計算目前滑動的位置
+    const scrollLeft = container.scrollLeft;
+    const clientWidth = container.clientWidth;
+    const activeIndex = Math.round(scrollLeft / clientWidth);
+
+    if (activeIndex === 0) {
+      dot1.classList.add('active');
+      dot2.classList.remove('active');
+    } else {
+      dot1.classList.remove('active');
+      dot2.classList.add('active');
+    }
+  });
+
 
   // 🔥 Firebase config
   const firebaseConfig = {
@@ -164,17 +192,17 @@
     const data = snapshot.val();
     if (!data) return;
 
-    // 更新儲冰槽資料 (使用 ?? 避免資料不存在時顯示 undefined)
+    // 儲冰槽
     document.getElementById("a").innerText = data["乳飲溫度"] ?? "-";
     document.getElementById("b").innerText = data["乳品溫度"] ?? "-";
     document.getElementById("c").innerText = data["乳品110"] ?? "-";
-    document.getElementById("d").innerText = data["一處回水"] ?? "-";
-    document.getElementById("e").innerText = data["二處回水"] ?? "-";
+    document.getElementById("d").innerText = data["一廠回水"] ?? "-";
+    document.getElementById("e").innerText = data["二廠回水"] ?? "-";
 
-    // ⚠️ 更新冷藏庫資料（請將 "冷藏庫一" 等字眼，改成你 Firebase 裡實際的欄位名稱）
-    document.getElementById("f1").innerText = data["一"] ?? "-";
-    document.getElementById("f2").innerText = data["二"] ?? "-";
-    document.getElementById("f3").innerText = data["三"] ?? "-";
+    // 冷藏庫 (⚠️請修改引號內的名稱，對應你 Firebase 的實際欄位)
+    document.getElementById("f1").innerText = data["一廠"] ?? "-";
+    document.getElementById("f2").innerText = data["二廠"] ?? "-";
+    document.getElementById("f3").innerText = data["布丁"] ?? "-";
 
     // 更新時間
     document.getElementById("time").innerText = formatTime(data["ts"]);
