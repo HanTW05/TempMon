@@ -104,6 +104,8 @@
     <div class="card">一廠<br><span class="value" id="f1">-</span></div>
     <div class="card">二廠<br><span class="value" id="f2">-</span></div>
     <div class="card">布丁<br><span class="value" id="f3">-</span></div>
+    <div class="card">一出<br><span class="value" id="f4">-</span></div>
+    <div class="card">二出<br><span class="value" id="f5">-</span></div>
   </div>
 
 </div>
@@ -173,6 +175,8 @@
     document.getElementById("f1").innerText = data["一廠"] ?? "-";
     document.getElementById("f2").innerText = data["二廠"] ?? "-";
     document.getElementById("f3").innerText = data["布丁"] ?? "-";
+    document.getElementById("f4").innerText = data["一出"] ?? "-";
+    document.getElementById("f5").innerText = data["二出"] ?? "-";
 
     // 更新時間
     document.getElementById("time").innerText = formatTime(data["ts"]);
