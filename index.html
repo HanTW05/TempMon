@@ -74,29 +74,6 @@
       margin: 5px 0 15px 0;
       font-weight: bold;
     }
-
-    /* 指示點點容器 */
-    .dots {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    /* 單個點點 */
-    .dot {
-      width: 10px;
-      height: 10px;
-      background-color: #444;
-      border-radius: 50%;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* 目前所在頁面的點點 */
-    .dot.active {
-      background-color: #00ffd5;
-      box-shadow: 0 0 8px rgba(0,255,213,0.8);
-    }
   </style>
 </head>
 
@@ -109,28 +86,21 @@
   <span id="time">-</span>
 </div>
 
-<!-- 滑動指示點點 -->
-<div class="dots">
-  <div class="dot active" id="dot-1"></div>
-  <div class="dot" id="dot-2"></div>
-</div>
 
 <!-- 左右滑動區塊 -->
 <div class="swipe-container" id="swipe-container">
   
   <!-- 第 1 頁：儲冰槽 -->
   <div class="swipe-page">
-    <div class="page-title">【 儲 】</div>
     <div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
     <div class="card">乳品110<br><span class="value" id="c">-</span></div>
     <div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
-    <div class="card">一處回水<br><span class="value" id="d">-</span></div>
-    <div class="card">二處回水<br><span class="value" id="e">-</span></div>
+    <div class="card">一廠回水<br><span class="value" id="d">-</span></div>
+    <div class="card">二廠回水<br><span class="value" id="e">-</span></div>
   </div>
 
   <!-- 第 2 頁：冷藏庫 -->
   <div class="swipe-page">
-    <div class="page-title">【 藏 】</div>
     <div class="card">一廠<br><span class="value" id="f1">-</span></div>
     <div class="card">二廠<br><span class="value" id="f2">-</span></div>
     <div class="card">布丁<br><span class="value" id="f3">-</span></div>
@@ -196,8 +166,8 @@
     document.getElementById("a").innerText = data["乳飲溫度"] ?? "-";
     document.getElementById("b").innerText = data["乳品溫度"] ?? "-";
     document.getElementById("c").innerText = data["乳品110"] ?? "-";
-    document.getElementById("d").innerText = data["一廠回水"] ?? "-";
-    document.getElementById("e").innerText = data["二廠回水"] ?? "-";
+    document.getElementById("d").innerText = data["一處回水"] ?? "-";
+    document.getElementById("e").innerText = data["二處回水"] ?? "-";
 
     // 冷藏庫 (⚠️請修改引號內的名稱，對應你 Firebase 的實際欄位)
     document.getElementById("f1").innerText = data["一廠"] ?? "-";
