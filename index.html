@@ -20,6 +20,47 @@
       margin-bottom: 15px;
     }
 
+    /* 標籤按鈕容器 */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    /* 標籤按鈕樣式 */
+    .tab-btn {
+      background: #1e1e1e;
+      color: #00ffd5;
+      border: 1px solid #00ffd5;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    /* 標籤按鈕啟用或懸停時的樣式 */
+    .tab-btn.active, .tab-btn:hover {
+      background: #00ffd5;
+      color: #0f0f0f;
+    }
+
+    /* 內容區塊隱藏與顯示 */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .card {
       background: #1e1e1e;
       margin: 10px auto;
@@ -33,6 +74,7 @@
 
     .time {
       color: #ffcc00;
+      margin-bottom: 20px;
     }
 
     .value {
@@ -47,23 +89,54 @@
 
 <h2>🔥 即時溫度監控</h2>
 
+<!-- 切換標籤按鈕 -->
+<div class="tabs">
+  <button id="btn-ice" class="tab-btn active" onclick="switchTab('ice')">儲冰槽</button>
+  <button id="btn-fridge" class="tab-btn" onclick="switchTab('fridge')">冷藏庫</button>
+</div>
+
 <div class="card time">
   更新時間<br>
   <span id="time">-</span>
 </div>
 
-<div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
-<div class="card">乳品110<br><span class="value" id="c">-</span></div>
-<div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
-<div class="card">一處回水<br><span class="value" id="d">-</span></div>
-<div class="card">二處回水<br><span class="value" id="e">-</span></div>
+<!-- 儲冰槽溫度區塊 (原本的) -->
+<div id="ice-tab" class="tab-content active">
+  <div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
+  <div class="card">乳品110<br><span class="value" id="c">-</span></div>
+  <div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
+  <div class="card">一處回水<br><span class="value" id="d">-</span></div>
+  <div class="card">二處回水<br><span class="value" id="e">-</span></div>
+</div>
+
+<!-- 冷藏庫溫度區塊 (新增的) -->
+<div id="fridge-tab" class="tab-content">
+  <div class="card">冷藏一庫<br><span class="value" id="f1">-</span></div>
+  <div class="card">冷藏二庫<br><span class="value" id="f2">-</span></div>
+  <div class="card">冷藏三庫<br><span class="value" id="f3">-</span></div>
+</div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-  // 🔥 Firebase config（你的）
+  // 🔘 標籤切換邏輯
+  function switchTab(tabName) {
+    // 移除所有內容的 active class
+    document.getElementById('ice-tab').classList.remove('active');
+    document.getElementById('fridge-tab').classList.remove('active');
+    
+    // 移除所有按鈕的 active class
+    document.getElementById('btn-ice').classList.remove('active');
+    document.getElementById('btn-fridge').classList.remove('active');
+    
+    // 將點擊的目標加上 active class
+    document.getElementById(tabName + '-tab').classList.add('active');
+    document.getElementById('btn-' + tabName).classList.add('active');
+  }
+
+  // 🔥 Firebase config
   const firebaseConfig = {
     databaseURL: "https://temp-mon-dab85-default-rtdb.asia-southeast1.firebasedatabase.app"
   };
@@ -91,12 +164,19 @@
     const data = snapshot.val();
     if (!data) return;
 
-    document.getElementById("a").innerText = data["乳飲溫度"];
-    document.getElementById("b").innerText = data["乳品溫度"];
-    document.getElementById("c").innerText = data["乳品110"];
-    document.getElementById("d").innerText = data["一處回水"];
-    document.getElementById("e").innerText = data["二處回水"];
+    // 更新儲冰槽資料 (使用 ?? 避免資料不存在時顯示 undefined)
+    document.getElementById("a").innerText = data["乳飲溫度"] ?? "-";
+    document.getElementById("b").innerText = data["乳品溫度"] ?? "-";
+    document.getElementById("c").innerText = data["乳品110"] ?? "-";
+    document.getElementById("d").innerText = data["一處回水"] ?? "-";
+    document.getElementById("e").innerText = data["二處回水"] ?? "-";
 
+    // ⚠️ 更新冷藏庫資料（請將 "冷藏庫一" 等字眼，改成你 Firebase 裡實際的欄位名稱）
+    document.getElementById("f1").innerText = data["一"] ?? "-";
+    document.getElementById("f2").innerText = data["二"] ?? "-";
+    document.getElementById("f3").innerText = data["三"] ?? "-";
+
+    // 更新時間
     document.getElementById("time").innerText = formatTime(data["ts"]);
   });
 </script>
