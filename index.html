@@ -334,51 +334,7 @@
       setConnectionError("冷藏庫資料讀取失敗");
     });
 
-    // 🔌 Firebase 連線狀態
-    let latestLoaded = false;
-    let latest2Loaded = false;
 
-    function updateConnectionStatus() {
-      // 以各自成功取得的資料判斷載入狀態
-      if (latestLoaded && latest2Loaded) {
-        statusEl.innerText = "Firebase 已連線";
-        statusEl.className = "connection-status connected";
-      }
-    }
-
-    function setConnectionError(message) {
-      statusEl.innerText = message;
-      statusEl.className = "connection-status error";
-    }
-
-    // 分別追蹤兩個路徑是否成功讀取
-    ref1.once("value").then(() => {
-      latestLoaded = true;
-      updateConnectionStatus();
-    }).catch(() => {
-      setConnectionError("Firebase 連線或儲冰槽讀取失敗");
-    });
-
-    ref2.once("value").then(() => {
-      latest2Loaded = true;
-      updateConnectionStatus();
-    }).catch(() => {
-      setConnectionError("Firebase 連線或冷藏庫讀取失敗");
-    });
-
-    // 👆 左右滑動時更新指示點
-    const container = document.getElementById("swipe-container");
-    const dot1 = document.getElementById("dot-1");
-    const dot2 = document.getElementById("dot-2");
-
-    container.addEventListener("scroll", () => {
-      const activeIndex = Math.round(
-        container.scrollLeft / container.clientWidth
-      );
-
-      dot1.classList.toggle("active", activeIndex === 0);
-      dot2.classList.toggle("active", activeIndex >= 1);
-    });
   </script>
 
 </body>
