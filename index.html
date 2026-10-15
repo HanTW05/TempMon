@@ -1,25 +1,61 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f0f0f">
   <title>TempMon Dashboard</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial;
+      font-family: Arial, "Noto Sans TC", sans-serif;
       background: #0f0f0f;
       color: white;
       text-align: center;
       margin: 0;
       padding: 10px;
-      /* 避免滑動時整個網頁跟著左右晃動 */
-      overflow-x: hidden; 
+      overflow-x: hidden;
     }
 
     h2 {
       color: #00ffd5;
-      margin-bottom: 15px;
+      margin: 12px 0 15px;
+      font-size: 24px;
+    }
+
+    .swipe-container {
+      display: flex;
+      width: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 10px;
+    }
+
+    .swipe-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .swipe-page {
+      flex: 0 0 100%;
+      min-width: 100%;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      padding: 0 2px;
+    }
+
+    .page-title {
+      color: #00ffd5;
+      font-size: 18px;
+      margin: 5px 0 12px;
+      font-weight: bold;
     }
 
     .card {
@@ -30,158 +66,322 @@
       font-size: 20px;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 0 10px rgba(0,255,213,0.2);
+      box-shadow: 0 0 10px rgba(0, 255, 213, 0.2);
     }
 
     .time {
       color: #ffcc00;
-      margin-bottom: 15px;
+      font-size: 17px;
+    }
+
+    .time .value {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 18px;
+      color: #ffcc00;
+      overflow-wrap: anywhere;
     }
 
     .value {
+      display: inline-block;
+      margin-top: 5px;
       font-size: 26px;
       font-weight: bold;
       color: #00ff99;
+      overflow-wrap: anywhere;
     }
 
-    /* 左右滑動的容器 */
-    .swipe-container {
+    .page-indicators {
       display: flex;
-      width: 100%;
-      overflow-x: auto;
-      /* CSS 滾動捕捉 (手機滑動的靈魂) */
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 10px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 5px 0 15px;
     }
 
-    /* 隱藏底部的滾動條 */
-    .swipe-container::-webkit-scrollbar {
-      display: none;
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #555;
+      transition: background 0.2s, transform 0.2s;
     }
 
-    /* 單個滑動頁面 */
-    .swipe-page {
-      min-width: 100%;
-      scroll-snap-align: center;
-      box-sizing: border-box;
+    .dot.active {
+      background: #00ffd5;
+      transform: scale(1.25);
     }
 
-    .page-title {
-      color: #00ffd5;
-      font-size: 18px;
-      margin: 5px 0 15px 0;
-      font-weight: bold;
+    .connection-status {
+      color: #aaa;
+      font-size: 13px;
+      margin: 10px 0 5px;
+    }
+
+    .connection-status.connected {
+      color: #00ff99;
+    }
+
+    .connection-status.error {
+      color: #ff7777;
     }
   </style>
 </head>
 
 <body>
 
-<h2>🔥 即時溫度監控</h2>
+  <h2>🔥 即時溫度監控</h2>
 
-<div class="card time">
-  更新時間<br>
-  <span id="time">-</span>
-</div>
+  <!-- 左右滑動區塊 -->
+  <div class="swipe-container" id="swipe-container">
 
+    <!-- 第 1 頁：plant/latest -->
+    <div class="swipe-page">
+      <div class="page-title">儲冰槽</div>
 
-<!-- 左右滑動區塊 -->
-<div class="swipe-container" id="swipe-container">
-  
-  <!-- 第 1 頁：儲冰槽 -->
-  <div class="swipe-page">
-    <div class="card">乳品溫度<br><span class="value" id="b">-</span></div>
-    <div class="card">乳品110<br><span class="value" id="c">-</span></div>
-    <div class="card">乳飲溫度<br><span class="value" id="a">-</span></div>
-    <div class="card">一廠回水<br><span class="value" id="d">-</span></div>
-    <div class="card">二廠回水<br><span class="value" id="e">-</span></div>
+      <div class="card time">
+        更新時間（儲冰槽）<br>
+        <span class="value" id="time1">-</span>
+      </div>
+
+      <div class="card">
+        乳品溫度<br>
+        <span class="value" id="b">-</span>
+      </div>
+
+      <div class="card">
+        乳品110<br>
+        <span class="value" id="c">-</span>
+      </div>
+
+      <div class="card">
+        乳飲溫度<br>
+        <span class="value" id="a">-</span>
+      </div>
+
+      <div class="card">
+        一廠回水<br>
+        <span class="value" id="d">-</span>
+      </div>
+
+      <div class="card">
+        二廠回水<br>
+        <span class="value" id="e">-</span>
+      </div>
+    </div>
+
+    <!-- 第 2 頁：plant/latest2 -->
+    <div class="swipe-page">
+      <div class="page-title">冷藏庫</div>
+
+      <div class="card time">
+        更新時間（冷藏庫）<br>
+        <span class="value" id="time2">-</span>
+      </div>
+
+      <div class="card">
+        一廠<br>
+        <span class="value" id="f1">-</span>
+      </div>
+
+      <div class="card">
+        二廠<br>
+        <span class="value" id="f2">-</span>
+      </div>
+
+      <div class="card">
+        布丁<br>
+        <span class="value" id="f3">-</span>
+      </div>
+
+      <div class="card">
+        一出<br>
+        <span class="value" id="f4">-</span>
+      </div>
+
+      <div class="card">
+        二出<br>
+        <span class="value" id="f5">-</span>
+      </div>
+    </div>
+
   </div>
 
-  <!-- 第 2 頁：冷藏庫 -->
-  <div class="swipe-page">
-    <div class="card">一廠<br><span class="value" id="f1">-</span></div>
-    <div class="card">二廠<br><span class="value" id="f2">-</span></div>
-    <div class="card">布丁<br><span class="value" id="f3">-</span></div>
-    <div class="card">一出<br><span class="value" id="f4">-</span></div>
-    <div class="card">二出<br><span class="value" id="f5">-</span></div>
+  <!-- 頁面指示點 -->
+  <div class="page-indicators">
+    <span class="dot active" id="dot-1"></span>
+    <span class="dot" id="dot-2"></span>
   </div>
 
-</div>
+  <div class="connection-status" id="status">
+    正在連線 Firebase...
+  </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<script>
-  // 🔘 監聽滑動事件，更新小點點的狀態
-  const container = document.getElementById('swipe-container');
-  const dot1 = document.getElementById('dot-1');
-  const dot2 = document.getElementById('dot-2');
+  <script>
+    // 🔥 Firebase 設定
+    const firebaseConfig = {
+      databaseURL:
+        "https://temp-mon-dab85-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
 
-  container.addEventListener('scroll', () => {
-    // 計算目前滑動的位置
-    const scrollLeft = container.scrollLeft;
-    const clientWidth = container.clientWidth;
-    const activeIndex = Math.round(scrollLeft / clientWidth);
+    firebase.initializeApp(firebaseConfig);
 
-    if (activeIndex === 0) {
-      dot1.classList.add('active');
-      dot2.classList.remove('active');
-    } else {
-      dot1.classList.remove('active');
-      dot2.classList.add('active');
+    const db = firebase.database();
+
+    // 📌 兩組資料各自獨立監聽
+    const ref1 = db.ref("plant/latest");
+    const ref2 = db.ref("plant/latest2");
+
+    const statusEl = document.getElementById("status");
+
+    // ⏱ 格式化時間
+    // 支援 YYYYMMDDHHmmss 格式，例如 20261015123045
+    function formatTime(ts) {
+      if (ts === undefined || ts === null || ts === "") {
+        return "-";
+      }
+
+      const value = String(ts);
+
+      if (/^\d{14}$/.test(value)) {
+        return (
+          value.slice(0, 4) + "/" +
+          value.slice(4, 6) + "/" +
+          value.slice(6, 8) + " " +
+          value.slice(8, 10) + ":" +
+          value.slice(10, 12) + ":" +
+          value.slice(12, 14)
+        );
+      }
+
+      // 如果來源提供的是一般日期字串，直接顯示
+      return value;
     }
-  });
 
+    // 🧊 第一頁：plant/latest
+    ref1.on("value", (snapshot) => {
+      const data = snapshot.val();
 
-  // 🔥 Firebase config
-  const firebaseConfig = {
-    databaseURL: "https://temp-mon-dab85-default-rtdb.asia-southeast1.firebasedatabase.app"
-  };
+      if (!data) {
+        document.getElementById("time1").innerText = "-";
+        ["a", "b", "c", "d", "e"].forEach((id) => {
+          document.getElementById(id).innerText = "-";
+        });
+        return;
+      }
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const ref = db.ref("plant/latest");
+      document.getElementById("a").innerText =
+        data["乳飲溫度"] ?? "-";
 
-  // ⏱ timestamp 轉時間
-  function formatTime(ts) {
-    if (!ts) return "-";
-  
-    const year = ts.slice(0,4);
-    const month = ts.slice(4,6);
-    const day = ts.slice(6,8);
-    const hour = ts.slice(8,10);
-    const min = ts.slice(10,12);
-    const sec = ts.slice(12,14);
-  
-    return `${year}/${month}/${day} ${hour}:${min}:${sec}`;
-  }
+      document.getElementById("b").innerText =
+        data["乳品溫度"] ?? "-";
 
-  // 🔄 即時監聽
-  ref.on("value", (snapshot) => {
-    const data = snapshot.val();
-    if (!data) return;
+      document.getElementById("c").innerText =
+        data["乳品110"] ?? "-";
 
-    // 儲冰槽
-    document.getElementById("a").innerText = data["乳飲溫度"] ?? "-";
-    document.getElementById("b").innerText = data["乳品溫度"] ?? "-";
-    document.getElementById("c").innerText = data["乳品110"] ?? "-";
-    document.getElementById("d").innerText = data["一處回水"] ?? "-";
-    document.getElementById("e").innerText = data["二處回水"] ?? "-";
+      document.getElementById("d").innerText =
+        data["一處回水"] ?? "-";
 
-    // 冷藏庫 (⚠️請修改引號內的名稱，對應你 Firebase 的實際欄位)
-    document.getElementById("f1").innerText = data["一廠"] ?? "-";
-    document.getElementById("f2").innerText = data["二廠"] ?? "-";
-    document.getElementById("f3").innerText = data["布丁"] ?? "-";
-    document.getElementById("f4").innerText = data["一出"] ?? "-";
-    document.getElementById("f5").innerText = data["二出"] ?? "-";
+      document.getElementById("e").innerText =
+        data["二處回水"] ?? "-";
 
-    // 更新時間
-    document.getElementById("time").innerText = formatTime(data["ts"]);
-  });
-</script>
+      // latest 專屬更新時間
+      document.getElementById("time1").innerText =
+        formatTime(data["ts"]);
+
+      updateConnectionStatus();
+    }, (error) => {
+      console.error("latest 讀取失敗：", error);
+      setConnectionError("儲冰槽資料讀取失敗");
+    });
+
+    // ❄️ 第二頁：plant/latest2
+    ref2.on("value", (snapshot) => {
+      const data = snapshot.val();
+
+      if (!data) {
+        document.getElementById("time2").innerText = "-";
+        ["f1", "f2", "f3", "f4", "f5"].forEach((id) => {
+          document.getElementById(id).innerText = "-";
+        });
+        return;
+      }
+
+      document.getElementById("f1").innerText =
+        data["一廠"] ?? "-";
+
+      document.getElementById("f2").innerText =
+        data["二廠"] ?? "-";
+
+      document.getElementById("f3").innerText =
+        data["布丁"] ?? "-";
+
+      document.getElementById("f4").innerText =
+        data["一出"] ?? "-";
+
+      document.getElementById("f5").innerText =
+        data["二出"] ?? "-";
+
+      // latest2 專屬更新時間
+      document.getElementById("time2").innerText =
+        formatTime(data["ts"]);
+
+      updateConnectionStatus();
+    }, (error) => {
+      console.error("latest2 讀取失敗：", error);
+      setConnectionError("冷藏庫資料讀取失敗");
+    });
+
+    // 🔌 Firebase 連線狀態
+    let latestLoaded = false;
+    let latest2Loaded = false;
+
+    function updateConnectionStatus() {
+      // 以各自成功取得的資料判斷載入狀態
+      if (latestLoaded && latest2Loaded) {
+        statusEl.innerText = "Firebase 已連線";
+        statusEl.className = "connection-status connected";
+      }
+    }
+
+    function setConnectionError(message) {
+      statusEl.innerText = message;
+      statusEl.className = "connection-status error";
+    }
+
+    // 分別追蹤兩個路徑是否成功讀取
+    ref1.once("value").then(() => {
+      latestLoaded = true;
+      updateConnectionStatus();
+    }).catch(() => {
+      setConnectionError("Firebase 連線或儲冰槽讀取失敗");
+    });
+
+    ref2.once("value").then(() => {
+      latest2Loaded = true;
+      updateConnectionStatus();
+    }).catch(() => {
+      setConnectionError("Firebase 連線或冷藏庫讀取失敗");
+    });
+
+    // 👆 左右滑動時更新指示點
+    const container = document.getElementById("swipe-container");
+    const dot1 = document.getElementById("dot-1");
+    const dot2 = document.getElementById("dot-2");
+
+    container.addEventListener("scroll", () => {
+      const activeIndex = Math.round(
+        container.scrollLeft / container.clientWidth
+      );
+
+      dot1.classList.toggle("active", activeIndex === 0);
+      dot2.classList.toggle("active", activeIndex >= 1);
+    });
+  </script>
 
 </body>
 </html>
